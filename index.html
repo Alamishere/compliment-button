@@ -237,17 +237,6 @@
     text-shadow: none;
   }
 
-  #counter {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255,255,255,0.3);
-    font-weight: 400;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-  }
-
   #dailyTally {
     position: fixed;
     bottom: 22px;
@@ -303,7 +292,6 @@
     <button id="btn"></button>
   </div>
   <div id="compliment"></div>
-  <div id="counter">Clicks: 0 / 10</div>
 </div>
 
 <div id="overlay">
@@ -436,7 +424,6 @@
     "Compliment break time. Stretch your legs, we'll be here in 2 minutes.",
     "You've been thoroughly flattered. Go wash a dish and return in 2 minutes.",
     "Even compliments need a recharge. Step away for 2 minutes.",
-    "That's the daily limit for feeling this good. Back in 2 minutes.",
     "Whoa there, champ. Let the praise settle for 2 minutes before round two.",
     "Your head is at full inflation. Recommended cooldown: 2 minutes.",
     "Plot twist: even confidence has a battery percentage. Recharging for 2 minutes.",
@@ -450,7 +437,18 @@
     "The compliment well has run dry. It's refilling. Give it 2 minutes.",
     "Step outside, look at a tree, remember you're a person. Back in 2 minutes.",
     "Your fan club needs a snack break. Reconvening in 2 minutes.",
-    "We've officially run out of nice things to say... for 2 minutes."
+    "We've officially run out of nice things to say... for 2 minutes.",
+    "You are currently too likable to operate this button. 2 minute timeout.",
+    "Our compliment department has filed for emergency leave. Back in 2 minutes.",
+    "You've been declared 'too iconic' by an internal committee. Cooldown: 2 minutes.",
+    "Side effects of this much praise may include smugness. Resting for 2 minutes.",
+    "This button is sweating from all the effort. Let it catch its breath. 2 minutes.",
+    "Compliments.exe has stopped responding due to excessive awesomeness. Retry in 2 minutes.",
+    "You broke our nice-o-meter. It needs 2 minutes to reset.",
+    "The universe is currently out of new ways to praise you. Back in 2 minutes.",
+    "Mandatory humility intermission. Popcorn optional. Back in 2 minutes.",
+    "Your charm levels triggered the emergency shutdown protocol. 2 minutes, please.",
+    "Even compliments file for overtime pay eventually. On break for 2 minutes."
   ];
 
   const stage = document.getElementById('stage');
@@ -459,7 +457,6 @@
   const overlay = document.getElementById('overlay');
   const restMessageEl = document.getElementById('restMessage');
   const countdownEl = document.getElementById('countdown');
-  const counterEl = document.getElementById('counter');
   const dailyTallyValueEl = document.getElementById('dailyTallyValue');
 
   const STATE_KEY = 'complimentButtonState';
@@ -606,7 +603,6 @@
     clickCount = 0;
     btn.classList.remove('locked');
     overlay.classList.remove('show');
-    counterEl.textContent = `Clicks: 0 / 10`;
     saveState(0, null);
   }
 
@@ -619,7 +615,6 @@
   function initState() {
     const { count, lockedUntil } = loadState();
     clickCount = count;
-    counterEl.textContent = `Clicks: ${clickCount} / 10`;
 
     if (lockedUntil && lockedUntil > Date.now()) {
       lockButton(lockedUntil);
@@ -633,7 +628,6 @@
     if (locked) return;
 
     clickCount++;
-    counterEl.textContent = `Clicks: ${clickCount} / 10`;
     spawnSparkBurst();
     changeBackground();
     bumpDailyTally();
