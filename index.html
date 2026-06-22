@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<meta name="referrer" content="no-referrer">
+<title>The Compliment Button</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  }
+
+  body {
+    background-image: linear-gradient(-45deg, #0b1e1c, #102e2a, #0a2230, #16332b);
+    background-size: 400% 400%;
+    animation: bgShift 18s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-image 1.2s ease;
+  }
+
+  @keyframes bgShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  #stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8vh;
+  }
+
+  /* ambient floating particles */
+  .particle {
+    position: absolute;
+    bottom: -20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    filter: blur(0.5px);
+    animation: floatUp linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+  }
+
+  /* the orb */
+  #orbWrap {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #halo {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120,230,200,0.4), rgba(80,180,190,0.15) 55%, transparent 75%);
+    animation: pulse 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50%      { transform: scale(1.18); opacity: 1; }
+  }
+
+  #btn {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    background: radial-gradient(circle at 35% 30%, #8ef0d4, #3fb89a 55%, #1f6f5c 100%);
+    background-size: 200% 200%;
+    animation: swirl 8s ease-in-out infinite;
+    box-shadow:
+      0 0 50px rgba(80,220,180,0.45),
+      inset 0 -12px 30px rgba(0,0,0,0.25),
+      inset 0 12px 25px rgba(255,255,255,0.35);
+    transition: transform 0.12s ease, box-shadow 0.3s ease, filter 0.4s ease;
+  }
+
+  @keyframes swirl {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  #btn::after {
+    content: "Compliment me";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 30px;
+    color: rgba(12,40,34,0.85);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    font-size: 0.8rem;
+    text-shadow: none;
+  }
+
+  #btn:hover {
+    transform: scale(1.04);
+    box-shadow:
+      0 0 70px rgba(80,220,180,0.65),
+      inset 0 -12px 30px rgba(0,0,0,0.25),
+      inset 0 12px 25px rgba(255,255,255,0.4);
+  }
+
+  #btn:active {
+    transform: scale(0.93);
+  }
+
+  #btn.locked {
+    animation: none;
+    background: linear-gradient(160deg, #777, #3a3a3a 70%);
+    box-shadow: 0 0 25px rgba(80,80,80,0.4), inset 0 -10px 25px rgba(0,0,0,0.4);
+    cursor: not-allowed;
+    filter: saturate(0.3);
+  }
+
+  #btn.locked::after {
+    content: "resting";
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* burst sparkles on click */
+  .spark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff8d6;
+    box-shadow: 0 0 8px 2px rgba(255,220,150,0.9);
+    pointer-events: none;
+    animation: sparkOut 0.7s ease-out forwards;
+  }
+
+  @keyframes sparkOut {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); }
+  }
+
+  #compliment {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateY(-6px);
+    max-width: 70vw;
+    text-align: center;
+    color: rgba(255,255,255,0.88);
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+    text-shadow: 0 1px 12px rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  #compliment.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 8, 20, 0.93);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    z-index: 10;
+  }
+
+  #overlay.show {
+    display: flex;
+  }
+
+  #overlay h1 {
+    color: rgba(255,170,140,0.92);
+    font-size: clamp(1.3rem, 2.8vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin: 0 0 0.9rem 0;
+    text-shadow: 0 0 18px rgba(255,140,100,0.35);
+  }
+
+  #overlay p {
+    color: rgba(230,226,240,0.85);
+    font-weight: 500;
+    font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    max-width: 560px;
+    margin: 0 0 2rem 0;
+    line-height: 1.6;
+  }
+
+  #countdown {
+    color: rgba(255,255,255,0.85);
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: none;
+  }
+
+  #counter {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.3);
+    font-weight: 400;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  #dailyTally {
+    position: fixed;
+    bottom: 22px;
+    right: 26px;
+    text-align: right;
+    color: rgba(255,255,255,0.55);
+    z-index: 5;
+  }
+
+  #dailyTally .label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 2px;
+  }
+
+  #dailyTally .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: rgba(120,230,200,0.85);
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="orbWrap">
+    <div id="halo"></div>
+    <button id="btn"></button>
+  </div>
+  <div id="compliment"></div>
+  <div id="counter">Clicks: 0 / 10</div>
+</div>
+
+<div id="overlay">
+  <p id="restMessage"></p>
+  <div id="countdown">02:00</div>
+</div>
+
+<div id="dailyTally">
+  <div class="label">Ego Meter</div>
+  <div class="value" id="dailyTallyValue">0</div>
+</div>
+
+<script>
+  const compliments = [
+    "NASA just called, your internet browsing posture is an absolute masterpiece.",
+    "9 out of 10 cats explicitly prefer you over other humans.",
+    "Your shadow is taking notes on how to be cooler.",
+    "Scientists have confirmed your hair looks intentional today.",
+    "Somewhere, a Wi-Fi router just got stronger signal because you walked by.",
+    "You parallel park like it's a TED talk on confidence.",
+    "Your typing sounds like a tiny orchestra of competence.",
+    "Even your error messages are impressed by you.",
+    "A barista once wrote a haiku about your vibe. It was 9/10.",
+    "Your search history reads like a bestselling memoir.",
+    "Houseplants visibly perk up in your presence.",
+    "You make microwave beeping sound like applause.",
+    "Your aura has its own LinkedIn endorsements.",
+    "Geese stop honking when you walk by. Out of respect.",
+    "Your playlist could end at least three minor wars.",
+    "You exit elevators with main-character energy.",
+    "Your handwriting could calm a stressed barista.",
+    "Even autocorrect trusts your judgment now.",
+    "You've been quietly winning at life since at least Tuesday.",
+    "Your sneeze has been described as 'inspiring' by witnesses.",
+    "Local pigeons have started a fan club in your honor.",
+    "Your Zoom background energy outshines actual sunlight.",
+    "You open jars other people gave up on. Legendary.",
+    "Your group chat replies have measurable comedic ROI.",
+    "Even your 'meh' days outperform most people's best days."
+  ];
+
+  const backgroundPalettes = [
+    "linear-gradient(-45deg, #0b1e1c, #102e2a, #0a2230, #16332b)",
+    "linear-gradient(-45deg, #1e0a2e, #2a0e3f, #150a3d, #271049)",
+    "linear-gradient(-45deg, #2b1207, #3a1a0d, #25150a, #3d2210)",
+    "linear-gradient(-45deg, #08202e, #0c2f44, #0a1a33, #103a4a)",
+    "linear-gradient(-45deg, #1a0e22, #2e1030, #220a2b, #380f3e)",
+    "linear-gradient(-45deg, #0e2418, #103324, #0a2e1f, #154433)"
+  ];
+
+  const restMessages = [
+    "Okay, that's enough compliments for now. Go drink some water and come back in 2 minutes.",
+    "Your ego needs a moment to recover. Touch some grass — back in 2 minutes.",
+    "Compliment break time. Stretch your legs, we'll be here in 2 minutes.",
+    "You've been thoroughly flattered. Go wash a dish and return in 2 minutes.",
+    "Even compliments need a recharge. Step away for 2 minutes.",
+    "That's the daily limit for feeling this good. Back in 2 minutes."
+  ];
+
+  const stage = document.getElementById('stage');
+  const btn = document.getElementById('btn');
+  const compliment = document.getElementById('compliment');
+  const overlay = document.getElementById('overlay');
+  const restMessageEl = document.getElementById('restMessage');
+  const countdownEl = document.getElementById('countdown');
+  const counterEl = document.getElementById('counter');
+  const dailyTallyValueEl = document.getElementById('dailyTallyValue');
+
+  const STATE_KEY = 'complimentButtonState';
+  const LOCK_DURATION_MS = 120000;
+
+  let clickCount = 0;
+  let locked = false;
+  let usedCompliments = [];
+  let lastBackground = backgroundPalettes[0];
+  let countdownInterval = null;
+
+  function loadState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+      const count = Number.isInteger(raw.clickCount) ? raw.clickCount : 0;
+      const lockedUntil = Number.isInteger(raw.lockedUntil) ? raw.lockedUntil : null;
+      return { count: Math.min(Math.max(count, 0), 10), lockedUntil };
+    } catch (e) {
+      return { count: 0, lockedUntil: null };
+    }
+  }
+
+  function saveState(count, lockedUntil) {
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify({ clickCount: count, lockedUntil }));
+    } catch (e) {
+      // localStorage unavailable — state just won't survive a reload
+    }
+  }
+
+  function getTodayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  let dailyTallyCount = 0;
+
+  function loadDailyTally() {
+    try {
+      const todayKey = getTodayKey();
+      const stored = JSON.parse(localStorage.getItem('egoMeter') || '{}');
+      dailyTallyCount = stored.date === todayKey ? stored.count : 0;
+    } catch (e) {
+      dailyTallyCount = 0;
+    }
+    dailyTallyValueEl.textContent = dailyTallyCount;
+  }
+
+  function bumpDailyTally() {
+    dailyTallyCount++;
+    dailyTallyValueEl.textContent = dailyTallyCount;
+    try {
+      localStorage.setItem('egoMeter', JSON.stringify({ date: getTodayKey(), count: dailyTallyCount }));
+    } catch (e) {
+      // localStorage unavailable in this context — tally still works for the session
+    }
+  }
+
+  loadDailyTally();
+
+  function changeBackground() {
+    let next;
+    do {
+      next = backgroundPalettes[Math.floor(Math.random() * backgroundPalettes.length)];
+    } while (next === lastBackground);
+    lastBackground = next;
+    document.body.style.backgroundImage = next;
+  }
+
+  // ambient background particles
+  function spawnParticles(count) {
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = 2 + Math.random() * 4;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.animationDuration = `${10 + Math.random() * 12}s`;
+      p.style.animationDelay = `${Math.random() * 12}s`;
+      stage.appendChild(p);
+    }
+  }
+  spawnParticles(40);
+
+  function spawnSparkBurst() {
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const s = document.createElement('div');
+      s.className = 'spark';
+      const angle = (Math.PI * 2 * i) / count;
+      const dist = 90 + Math.random() * 50;
+      s.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      s.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      document.getElementById('orbWrap').appendChild(s);
+      s.addEventListener('animationend', () => s.remove());
+    }
+  }
+
+  function getRandomCompliment() {
+    if (usedCompliments.length === compliments.length) {
+      usedCompliments = [];
+    }
+    let pick;
+    do {
+      pick = compliments[Math.floor(Math.random() * compliments.length)];
+    } while (usedCompliments.includes(pick));
+    usedCompliments.push(pick);
+    return pick;
+  }
+
+  function showCompliment(text) {
+    compliment.textContent = text;
+    compliment.classList.remove('show');
+    requestAnimationFrame(() => {
+      compliment.classList.add('show');
+    });
+  }
+
+  function lockButton(lockedUntil) {
+    locked = true;
+    btn.classList.add('locked');
+    restMessageEl.textContent = restMessages[Math.floor(Math.random() * restMessages.length)];
+    overlay.classList.add('show');
+    compliment.classList.remove('show');
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    function tick() {
+      const secondsLeft = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+      countdownEl.textContent = formatTime(secondsLeft);
+      if (secondsLeft <= 0) {
+        clearInterval(countdownInterval);
+        unlockButton();
+      }
+    }
+
+    tick();
+    countdownInterval = setInterval(tick, 1000);
+  }
+
+  function unlockButton() {
+    locked = false;
+    clickCount = 0;
+    btn.classList.remove('locked');
+    overlay.classList.remove('show');
+    counterEl.textContent = `Clicks: 0 / 10`;
+    saveState(0, null);
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function initState() {
+    const { count, lockedUntil } = loadState();
+    clickCount = count;
+    counterEl.textContent = `Clicks: ${clickCount} / 10`;
+
+    if (lockedUntil && lockedUntil > Date.now()) {
+      lockButton(lockedUntil);
+    } else if (lockedUntil) {
+      // a previous lock already expired while the page was closed
+      unlockButton();
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    if (locked) return;
+
+    clickCount++;
+    counterEl.textContent = `Clicks: ${clickCount} / 10`;
+    spawnSparkBurst();
+    changeBackground();
+    bumpDailyTally();
+
+    if (clickCount >= 10) {
+      const lockedUntil = Date.now() + LOCK_DURATION_MS;
+      saveState(clickCount, lockedUntil);
+      lockButton(lockedUntil);
+    } else {
+      saveState(clickCount, null);
+      showCompliment(getRandomCompliment());
+    }
+  });
+
+  initState();
+</script>
+
+</body>
+</html>
